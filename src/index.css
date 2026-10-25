@@ -1,0 +1,182 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", ui-rounded, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+
+  /* Surfaces */
+  --color-app: #4B4170;      /* page background (muted dusty purple) */
+  --color-panel: #3B3259;    /* cards and panels */
+  --color-deep: #2E2748;     /* inputs, deepest elements, dark text on sand */
+
+  /* Accents */
+  --color-sand: #EDC48E;     /* primary buttons and hero cards */
+  --color-sky: #8FB8E8;
+  --color-lavender: #B9A3F0;
+  --color-salmon: #EFA3A0;
+
+  /* Text */
+  --color-ink: #F3EEF9;      /* primary text */
+  --color-muted: #B7AECF;    /* secondary text on panel/deep (≥ 5.5:1) */
+  --color-haze: #CDC6E2;     /* secondary text on the lighter app background (≥ 4.5:1) */
+
+  --radius-card: 28px;
+
+  --animate-typing: typing 1.2s ease-in-out infinite;
+  --animate-pop: pop 0.3s ease-out both;
+  --animate-sheet: sheet-up 0.25s ease-out both;
+
+  @keyframes typing {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.5; }
+    40% { transform: translateY(-3px); opacity: 1; }
+  }
+  @keyframes pop {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes sheet-up {
+    from { transform: translateY(24px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-app);
+    color-scheme: dark;
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--color-app);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Visible sand focus rings everywhere… */
+  :focus-visible {
+    outline: 3px solid var(--color-sand);
+    outline-offset: 3px;
+  }
+
+  /* …switching to dark rings on sand surfaces so they stay visible. */
+  .on-sand :focus-visible {
+    outline-color: var(--color-deep);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
+  }
+
+  select {
+    appearance: none;
+  }
+}
+
+@layer components {
+  /* Cards whose real control is a visually hidden input (answer options,
+     segmented radios) show the focus ring on the whole card. */
+  .focus-ring-within:has(:focus-visible) {
+    outline: 3px solid var(--color-sand);
+    outline-offset: 3px;
+  }
+
+  /* Visible radio / checkbox: native ones render dark grey on the dark
+     panels, below the 3:1 contrast UI controls need. */
+  .radio,
+  .checkbox {
+    appearance: none;
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--color-muted);
+    background: var(--color-deep);
+    cursor: pointer;
+  }
+  .radio {
+    border-radius: 9999px;
+  }
+  .checkbox {
+    border-radius: 0.45rem;
+  }
+  .radio:checked {
+    border-color: var(--color-sand);
+    background: var(--color-sand);
+    box-shadow: inset 0 0 0 4px var(--color-deep);
+  }
+  .checkbox:checked {
+    border-color: var(--color-sand);
+    background: var(--color-sand)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232E2748' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E")
+      center / 80% no-repeat;
+  }
+
+  /* Ticket halves: semicircle notches are real cut-outs (CSS masks), so
+     the ticket works on any background. */
+  .ticket-top {
+    --notch: 14px;
+    -webkit-mask:
+      radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle var(--notch) at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--notch) at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+
+  .ticket-bottom {
+    --notch: 14px;
+    -webkit-mask:
+      radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle var(--notch) at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+      radial-gradient(circle var(--notch) at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+  }
+
+  /* Bottom sheet built on the native <dialog>, so focus trapping, Esc and
+     the inert background come from the browser. */
+  dialog.sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 420px;
+    max-height: 88dvh;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    background: var(--color-panel);
+    color: var(--color-ink);
+    overflow: hidden;
+  }
+  dialog.sheet[open] {
+    display: flex;
+    flex-direction: column;
+    animation: var(--animate-sheet);
+  }
+  dialog.sheet::backdrop {
+    background: rgb(20 14 40 / 0.65);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
